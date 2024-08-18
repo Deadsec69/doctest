@@ -1,9 +1,9 @@
 # Import the requests library
 import requests
-
+import sys
 # Define the URL of the Azure Function
 url = "https://pdfprocessorapi.azurewebsites.net/api/ProcessPDF"
-code_param = "" #mention secret here
+code_param = sys.argv[1] #mention secret here
 # Define the parameters to be sent with the request
 params = {
     "code": code_param,  # The function key
