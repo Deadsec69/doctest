@@ -15,9 +15,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             "Missing pdf_url parameter",
             status_code=400
         )
-    
-    endpoint = "https://test-document-shivam.cognitiveservices.azure.com/"
-    key = "a92eb119460b4e04b9bb01604bbf986d"
+    endpoint = os.getenv("FORM_RECOGNIZER_ENDPOINT")
+    key = os.getenv("FORM_RECOGNIZER_KEY")
 
     if not endpoint or not key:
         logging.error("Azure Document Intelligence credentials not found")
