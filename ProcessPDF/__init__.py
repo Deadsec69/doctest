@@ -7,18 +7,32 @@ import json
 import os
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Azure Function App to process a PDF document using Azure's Document Analysis Client.
+    The function is triggered by an HTTP request and expects a 'pdf_url' parameter in the request.
+
+    :param req: The HTTP trigger request object.
+    :return: An HTTP response object. The response body contains the analysis result in JSON format.
+    """
+
+    # Log that the function was called
     logging.info("ProcessPDF function called")
     
+    # Get the URL of the PDF document from the request parameters
     pdf_url = req.params.get('pdf_url')
     if not pdf_url:
+        # If the 'pdf_url' parameter is missing, return a 400 response
         return func.HttpResponse(
             "Missing pdf_url parameter",
             status_code=400
         )
+
+    # Get the Azure Document Intelligence credentials from environment variables
     endpoint = os.getenv("FORM_RECOGNIZER_ENDPOINT")
     key = os.getenv("FORM_RECOGNIZER_KEY")
 
     if not endpoint or not key:
+        # If the credentials are not found, log an error and return a 500 response
         logging.error("Azure Document Intelligence credentials not found")
         return func.HttpResponse(
             "Azure Document Intelligence credentials not found",
@@ -34,6 +48,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         # Analyze the document
         poller = document_analysis_client.begin_analyze_document_from_url("prebuilt-read", pdf_url)
         analysis_result = poller.result()
+
+        # Log the analysis result
         logging.info(f"Analysis result: {analysis_result}")
         
         # Convert the result to a JSON-serializable dictionary
@@ -66,12 +82,14 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             status_code=200
         )
     except ResourceNotFoundError:
+        # If the PDF file could not be found or accessed, log an error and return a 404 response
         logging.error("The PDF file could not be found or accessed")
         return func.HttpResponse(
             "The PDF file could not be found or accessed.",
             status_code=404
         )
     except Exception as e:
+        # If an error occurred, log the error and return a 500 response
         logging.error(f"An error occurred: {str(e)}")
         return func.HttpResponse(
             f"An error occurred: {str(e)}",
